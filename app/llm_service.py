@@ -45,7 +45,7 @@ def check_ollama_connection() -> Dict[str, Any]:
         if hasattr(models_response, 'models'):
             models = [model.model for model in models_response.models]
         elif isinstance(models_response, dict) and 'models' in models_response:
-            models = [model.get('name', model.get('model', '')) 
+            models = [model.get('name', model.get('model', ''))
                      for model in models_response['models']]
         
         logger.info(f"Ollama connection successful. Available models: {models}")
@@ -222,13 +222,26 @@ def complete_with_ollama(
     model = model or Config.OLLAMA_MODEL
     available_models = connection_status.get('models', [])
     
-    if available_models and model not in available_models:
-        return {
-            'error': 'Model not available',
-            'message': f"Model '{model}' is not available",
-            'available_models': available_models,
-            'suggestion': f"Pull the model first: ollama pull {model}"
-        }
+    # Check if model is available (handle both "model" and "model:tag" formats)
+    if available_models:
+        model_found = False
+        for available_model in available_models:
+            # Check exact match or base name match (e.g., "mistral" matches "mistral:latest")
+            if model == available_model or model == available_model.split(':')[0]:
+                model_found = True
+                break
+            # Also check if requested model has tag and matches available model base
+            if ':' in model and model.split(':')[0] == available_model.split(':')[0]:
+                model_found = True
+                break
+        
+        if not model_found:
+            return {
+                'error': 'Model not available',
+                'message': f"Model '{model}' is not available",
+                'available_models': available_models,
+                'suggestion': f"Pull the model first: ollama pull {model}"
+            }
     
     # Generate the completion
     try:
