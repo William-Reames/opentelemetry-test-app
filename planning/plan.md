@@ -518,7 +518,7 @@ curl http://localhost:5000/health
 # Should return: {"status": "healthy", "timestamp": "..."}
 ```
 
-### Phase 2: OpenTelemetry & Traceloop Setup [PENDING]
+### Phase 2: OpenTelemetry & Traceloop Setup [COMPLETED]
 
 Integrate OpenTelemetry and Traceloop SDK for tracing.
 

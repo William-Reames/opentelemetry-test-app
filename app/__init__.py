@@ -6,6 +6,7 @@ This module initializes the Flask application and sets up routes.
 
 from flask import Flask
 from app.config import Config
+from app.telemetry import initialize_telemetry
 
 
 def create_app():
@@ -28,6 +29,9 @@ def create_app():
     if Config.FLASK_DEBUG:
         Config.display()
     
+    # Initialize telemetry
+    initialize_telemetry(app, Config)
+
     # Register routes
     from app.routes import register_routes
     register_routes(app)

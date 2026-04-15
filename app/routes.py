@@ -5,7 +5,9 @@ This module defines all API endpoints for the application.
 """
 
 from datetime import datetime
-from flask import jsonify, request
+from flask import jsonify
+
+from app.telemetry import add_span_attributes
 
 
 def register_routes(app):
@@ -24,10 +26,20 @@ def register_routes(app):
         Returns:
             JSON response with status and timestamp.
         """
+        timestamp = datetime.utcnow().isoformat() + 'Z'
+        service_name = app.config.get('OTEL_SERVICE_NAME', 'ai-tracing-prototype')
+
+        add_span_attributes(**{
+            'health.status': 'healthy',
+            'health.timestamp': timestamp,
+            'service.name': service_name,
+            'request.type': 'health_check',
+        })
+
         return jsonify({
             'status': 'healthy',
-            'timestamp': datetime.utcnow().isoformat() + 'Z',
-            'service': 'ai-tracing-prototype'
+            'timestamp': timestamp,
+            'service': service_name
         }), 200
     
     @app.route('/', methods=['GET'])
