@@ -523,14 +523,14 @@ curl http://localhost:5000/health
 Integrate OpenTelemetry and Traceloop SDK for tracing.
 
 **Tasks:**
-- [PENDING] Install OpenTelemetry packages (api, sdk, instrumentation-flask)
-- [PENDING] Install Traceloop SDK
-- [PENDING] Create `app/telemetry.py` for tracing initialization
-- [PENDING] Initialize Traceloop SDK with API key
-- [PENDING] Configure OpenTelemetry Flask instrumentation
-- [PENDING] Add basic span attributes to health endpoint
-- [PENDING] Test trace export to OpenLLMetry
-- [PENDING] Verify traces appear in OpenLLMetry dashboard
+- [COMPLETED] Install OpenTelemetry packages (api, sdk, instrumentation-flask)
+- [COMPLETED] Install Traceloop SDK
+- [COMPLETED] Create `app/telemetry.py` for tracing initialization
+- [COMPLETED] Initialize Traceloop SDK with API key
+- [COMPLETED] Configure OpenTelemetry Flask instrumentation
+- [COMPLETED] Add basic span attributes to health endpoint
+- [COMPLETED] Test trace export to OpenLLMetry
+- [COMPLETED] Verify traces appear in OpenLLMetry dashboard
 
 **Deliverables:**
 - Tracing fully configured and operational
@@ -607,7 +607,7 @@ curl -X POST http://localhost:5000/api/rag/query \
 Add tests and comprehensive documentation.
 
 **Tasks:**
-- [COMPLETED] Write unit tests in `tests/test_llm.py`
+- [PENDING] Write unit tests in `tests/test_llm.py`
 - [PENDING] Write unit tests in `tests/test_rag.py`
 - [PENDING] Create `docs/SETUP.md` with step-by-step setup instructions
 - [PENDING] Create `docs/API.md` with endpoint documentation and examples
