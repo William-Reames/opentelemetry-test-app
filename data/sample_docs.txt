@@ -1,0 +1,39 @@
+OpenTelemetry is an observability framework for cloud-native software. It provides a collection of tools, APIs, and SDKs for instrumenting applications to generate, collect, and export telemetry data such as traces, metrics, and logs.
+
+Distributed tracing allows you to track requests as they flow through distributed systems. Each trace consists of one or more spans representing operations. Spans can have parent-child relationships, forming a tree structure that represents the execution flow.
+
+A span is the building block of distributed tracing. It represents a single operation within a trace. Spans include important information such as the operation name, start and end timestamps, attributes, events, and links to other spans.
+
+OpenTelemetry provides automatic instrumentation for many popular frameworks and libraries. This means you can get basic tracing without modifying your application code. However, manual instrumentation allows you to add custom spans and attributes for business-specific operations.
+
+Large Language Models (LLMs) can be monitored using specialized observability tools. Tracking prompts, completions, token usage, and latency is essential for production systems. This helps identify performance bottlenecks, cost issues, and quality problems.
+
+LLM observability involves capturing metadata about each model invocation, including the model name, temperature settings, max tokens, and the actual prompt and completion text. This data helps debug issues and optimize model performance.
+
+Vector databases store high-dimensional embeddings that represent semantic meaning. They enable similarity search, where you can find documents or data points that are semantically similar to a query, even if they don't share exact keywords.
+
+Retrieval-Augmented Generation (RAG) is a technique that combines information retrieval with language model generation. First, relevant documents are retrieved from a knowledge base using semantic search. Then, these documents are provided as context to the LLM to generate more accurate and grounded responses.
+
+The RAG pipeline typically consists of several steps: query embedding generation, vector similarity search, context assembly, and final LLM generation. Each step can be traced independently to understand performance characteristics.
+
+Embeddings are dense vector representations of text that capture semantic meaning. Modern embedding models like sentence-transformers can convert text into vectors that preserve semantic relationships, enabling powerful search capabilities.
+
+ChromaDB is an open-source vector database designed for AI applications. It provides an embedded mode that requires no separate server, making it ideal for prototypes and development. ChromaDB supports various embedding functions and distance metrics.
+
+Tracing AI applications presents unique challenges. LLM calls can be slow and expensive, vector searches involve complex operations, and the full context of a RAG query spans multiple services. Proper instrumentation helps identify optimization opportunities.
+
+OpenLLMetry is a platform built on OpenTelemetry specifically designed for LLM observability. It provides enhanced visualization and analysis tools for AI workloads, including prompt tracking, token usage analysis, and cost estimation.
+
+Span attributes in OpenTelemetry are key-value pairs that provide additional context about an operation. For LLM spans, useful attributes include model name, prompt length, completion length, token count, and temperature settings.
+
+Context propagation in distributed tracing ensures that span relationships are maintained across service boundaries. OpenTelemetry uses context objects and propagators to automatically pass trace context through HTTP headers and other transport mechanisms.
+
+Sampling in tracing determines which traces are collected and exported. For development, 100% sampling is common. In production, sampling rates are often reduced to manage data volume and costs while still capturing representative traces.
+
+The OpenTelemetry Collector is a vendor-agnostic service that receives, processes, and exports telemetry data. It can be deployed as an agent or gateway, providing buffering, batching, and routing capabilities for telemetry pipelines.
+
+Semantic search uses embeddings to find relevant information based on meaning rather than exact keyword matches. This is particularly powerful for RAG systems, where the goal is to find contextually relevant information to augment LLM responses.
+
+Token usage tracking is critical for LLM cost management. Each API call to an LLM consumes tokens for both the prompt and completion. Monitoring token usage helps predict costs and identify opportunities for prompt optimization.
+
+Latency in AI applications comes from multiple sources: embedding generation, vector search, LLM inference, and network overhead. Distributed tracing helps identify which component contributes most to overall latency, enabling targeted optimization.

@@ -571,23 +571,23 @@ curl -X POST http://localhost:5000/api/llm/complete \
   -d '{"prompt": "What is OpenTelemetry?"}'
 ```
 
-### Phase 4: ChromaDB & RAG Implementation [PENDING]
+### Phase 4: ChromaDB & RAG Implementation [COMPLETED]
 
 Implement vector database and RAG functionality.
 
 **Tasks:**
-- [PENDING] Install `chromadb` and `sentence-transformers` packages
-- [PENDING] Create `app/rag_service.py` with ChromaDB client
-- [PENDING] Implement ChromaDB initialization (persistent mode)
-- [PENDING] Create document ingestion function (chunking + embedding)
-- [PENDING] Create sample documents in `data/sample_docs.txt`
-- [PENDING] Implement vector search function
-- [PENDING] Implement context assembly for RAG
-- [PENDING] Create `/api/rag/query` endpoint
-- [PENDING] Add Traceloop decorators for vector operations
-- [PENDING] Add custom spans for embedding and search
-- [PENDING] Test RAG endpoint with sample queries
-- [PENDING] Verify RAG traces in OpenLLMetry with full span hierarchy
+- [COMPLETED] Install `chromadb` and `sentence-transformers` packages
+- [COMPLETED] Create `app/rag_service.py` with ChromaDB client
+- [COMPLETED] Implement ChromaDB initialization (persistent mode)
+- [COMPLETED] Create document ingestion function (chunking + embedding)
+- [COMPLETED] Create sample documents in `data/sample_docs.txt`
+- [COMPLETED] Implement vector search function
+- [COMPLETED] Implement context assembly for RAG
+- [COMPLETED] Create `/api/rag/query` endpoint
+- [COMPLETED] Add Traceloop decorators for vector operations
+- [COMPLETED] Add custom spans for embedding and search
+- [COMPLETED] Test RAG endpoint with sample queries
+- [COMPLETED] Verify RAG traces in OpenLLMetry with full span hierarchy
 
 **Deliverables:**
 - Working RAG query endpoint

@@ -9,6 +9,7 @@ from flask import jsonify, request
 
 from app.telemetry import add_span_attributes
 from app.llm_service import complete_with_ollama
+from app.rag_service import query_with_rag, ingest_documents, get_collection_stats
 
 
 def register_routes(app):
@@ -55,9 +56,11 @@ def register_routes(app):
             'service': 'AI Tracing Prototype',
             'version': '1.0.0',
             'endpoints': {
-                'health': '/health',
+                'health': '/health (GET)',
                 'llm_complete': '/api/llm/complete (POST)',
-                'rag_query': '/api/rag/query (POST)'
+                'rag_query': '/api/rag/query (POST)',
+                'rag_ingest': '/api/rag/ingest (POST)',
+                'rag_stats': '/api/rag/stats (GET)'
             }
         }), 200
     
@@ -158,19 +161,217 @@ def register_routes(app):
                 'message': str(e)
             }), 500
     
-    # Placeholder for RAG endpoint (Phase 4)
     @app.route('/api/rag/query', methods=['POST'])
     def rag_query():
         """
-        RAG query endpoint (to be implemented in Phase 4).
+        RAG query endpoint.
+        
+        Request body:
+            {
+                "query": "Your question here",
+                "top_k": 3 (optional),
+                "min_score": 0.0 (optional),
+                "model": "llama2" (optional),
+                "max_tokens": 200 (optional)
+            }
         
         Returns:
-            JSON response indicating endpoint is not yet implemented.
+            JSON response with retrieved documents and generated answer.
         """
-        return jsonify({
-            'error': 'Not implemented yet',
-            'message': 'This endpoint will be implemented in Phase 4'
-        }), 501
+        # Validate request
+        if not request.is_json:
+            return jsonify({
+                'error': 'Invalid request',
+                'message': 'Content-Type must be application/json'
+            }), 400
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        if 'query' not in data:
+            return jsonify({
+                'error': 'Missing required field',
+                'message': 'Request must include "query" field'
+            }), 400
+        
+        query = data['query']
+        if not query or not isinstance(query, str):
+            return jsonify({
+                'error': 'Invalid query',
+                'message': 'Query must be a non-empty string'
+            }), 400
+        
+        # Extract optional parameters
+        top_k = data.get('top_k', 3)
+        min_score = data.get('min_score', 0.0)
+        model = data.get('model')
+        max_tokens = data.get('max_tokens')
+        
+        # Validate parameters
+        if not isinstance(top_k, int) or top_k < 1 or top_k > 10:
+            return jsonify({
+                'error': 'Invalid top_k',
+                'message': 'top_k must be an integer between 1 and 10'
+            }), 400
+        
+        if not isinstance(min_score, (int, float)) or min_score < 0 or min_score > 1:
+            return jsonify({
+                'error': 'Invalid min_score',
+                'message': 'min_score must be a number between 0 and 1'
+            }), 400
+        
+        # Add request attributes to span
+        add_span_attributes(**{
+            'request.type': 'rag_query',
+            'rag.query_length': len(query),
+            'rag.top_k': top_k,
+            'rag.min_score': min_score,
+        })
+        
+        # Call RAG service
+        try:
+            result = query_with_rag(
+                query=query,
+                top_k=top_k,
+                min_score=min_score,
+                model=model,
+                max_tokens=max_tokens
+            )
+            
+            # Check if there was an error
+            if 'error' in result:
+                add_span_attributes(**{
+                    'error': True,
+                    'error.type': result['error']
+                })
+                
+                return jsonify(result), 500
+            
+            # Add success attributes to span
+            add_span_attributes(**{
+                'rag.retrieved_docs_count': len(result.get('retrieved_docs', [])),
+                'rag.answer_length': len(result.get('answer', '')),
+                'rag.total_latency_ms': result.get('latency_ms', 0),
+            })
+            
+            return jsonify(result), 200
+        
+        except Exception as e:
+            add_span_attributes(**{
+                'error': True,
+                'error.message': str(e)
+            })
+            
+            return jsonify({
+                'error': 'Internal error',
+                'message': str(e)
+            }), 500
+    
+    @app.route('/api/rag/ingest', methods=['POST'])
+    def rag_ingest():
+        """
+        Document ingestion endpoint.
+        
+        Request body:
+            {
+                "file_path": "path/to/documents.txt",
+                "chunk_size": 500 (optional),
+                "overlap": 50 (optional)
+            }
+        
+        Returns:
+            JSON response with ingestion results.
+        """
+        # Validate request
+        if not request.is_json:
+            return jsonify({
+                'error': 'Invalid request',
+                'message': 'Content-Type must be application/json'
+            }), 400
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        if 'file_path' not in data:
+            return jsonify({
+                'error': 'Missing required field',
+                'message': 'Request must include "file_path" field'
+            }), 400
+        
+        file_path = data['file_path']
+        chunk_size = data.get('chunk_size', 500)
+        overlap = data.get('overlap', 50)
+        
+        # Add request attributes to span
+        add_span_attributes(**{
+            'request.type': 'rag_ingest',
+            'rag.file_path': file_path,
+            'rag.chunk_size': chunk_size,
+            'rag.overlap': overlap,
+        })
+        
+        # Call ingestion service
+        try:
+            result = ingest_documents(
+                file_path=file_path,
+                chunk_size=chunk_size,
+                overlap=overlap
+            )
+            
+            # Check if there was an error
+            if 'error' in result:
+                add_span_attributes(**{
+                    'error': True,
+                    'error.type': 'ingestion_failed'
+                })
+                
+                return jsonify(result), 500
+            
+            # Add success attributes to span
+            add_span_attributes(**{
+                'rag.chunks_ingested': result.get('chunks_count', 0),
+                'rag.ingestion_latency_ms': result.get('latency_ms', 0),
+            })
+            
+            return jsonify(result), 200
+        
+        except Exception as e:
+            add_span_attributes(**{
+                'error': True,
+                'error.message': str(e)
+            })
+            
+            return jsonify({
+                'error': 'Internal error',
+                'message': str(e)
+            }), 500
+    
+    @app.route('/api/rag/stats', methods=['GET'])
+    def rag_stats():
+        """
+        Get RAG collection statistics.
+        
+        Returns:
+            JSON response with collection stats.
+        """
+        add_span_attributes(**{
+            'request.type': 'rag_stats',
+        })
+        
+        try:
+            stats = get_collection_stats()
+            return jsonify(stats), 200
+        
+        except Exception as e:
+            add_span_attributes(**{
+                'error': True,
+                'error.message': str(e)
+            })
+            
+            return jsonify({
+                'error': 'Internal error',
+                'message': str(e)
+            }), 500
     
     # Error handlers
     @app.errorhandler(404)
