@@ -4,7 +4,7 @@ API routes for the AI Tracing Prototype.
 This module defines all API endpoints for the application.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import jsonify, request
 
 from app.telemetry import add_span_attributes
@@ -28,7 +28,7 @@ def register_routes(app):
         Returns:
             JSON response with status and timestamp.
         """
-        timestamp = datetime.utcnow().isoformat() + 'Z'
+        timestamp = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         service_name = app.config.get('OTEL_SERVICE_NAME', 'ai-tracing-prototype')
 
         add_span_attributes(**{
