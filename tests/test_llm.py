@@ -66,6 +66,7 @@ class TestCheckOllamaConnection:
         mock_client = MagicMock()
         mock_model = MagicMock()
         mock_model.name = "llama2:latest"
+        mock_model.model = "llama2:latest"  # Add model attribute too
         mock_response = MagicMock()
         mock_response.models = [mock_model]
         mock_client.list.return_value = mock_response
@@ -114,7 +115,7 @@ class TestGenerateCompletion:
         assert result["prompt_tokens"] == 10
         assert result["completion_tokens"] == 15
         assert "latency_ms" in result
-        assert result["latency_ms"] > 0
+        assert result["latency_ms"] >= 0  # Can be 0 in fast tests
 
         # Verify span attributes were set
         mock_current_span.set_attribute.assert_any_call("llm.model", "llama2")
@@ -171,12 +172,15 @@ class TestGenerateCompletion:
     @patch("app.llm_service.trace.get_current_span")
     def test_handles_object_response(self, mock_span, mock_client_class):
         """Test handling of object-based response from Ollama."""
-        # Setup mock with object-like response
+        # Setup mock with object-like response that has model_dump method
         mock_client = MagicMock()
         mock_response = MagicMock()
-        mock_response.response = "Test completion"
-        mock_response.prompt_eval_count = 8
-        mock_response.eval_count = 12
+        # Configure model_dump to return a dict
+        mock_response.model_dump.return_value = {
+            "response": "Test completion",
+            "prompt_eval_count": 8,
+            "eval_count": 12,
+        }
         mock_client.generate.return_value = mock_response
         mock_client_class.return_value = mock_client
 
@@ -288,8 +292,8 @@ class TestCompleteWithOllama:
         }
         mock_generate.side_effect = OllamaServiceError("Generation failed")
 
-        # Execute
-        result = complete_with_ollama(prompt="Test prompt")
+        # Execute - specify model explicitly to match available models
+        result = complete_with_ollama(prompt="Test prompt", model="llama2")
 
         # Verify
         assert "error" in result
