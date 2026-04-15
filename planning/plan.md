@@ -542,20 +542,20 @@ Integrate OpenTelemetry and Traceloop SDK for tracing.
 - Check OpenLLMetry dashboard for trace
 - Verify span attributes are present
 
-### Phase 3: Ollama Integration [PENDING]
+### Phase 3: Ollama Integration [COMPLETED]
 
 Implement LLM completion using Ollama.
 
 **Tasks:**
-- [PENDING] Install `ollama` Python package
-- [PENDING] Create `app/llm_service.py` with Ollama client
-- [PENDING] Implement connection check function
-- [PENDING] Implement completion function with error handling
-- [PENDING] Add Traceloop decorators for LLM operations
-- [PENDING] Create `/api/llm/complete` endpoint in `app/routes.py`
-- [PENDING] Add custom span attributes (model, tokens, prompt length)
-- [PENDING] Test LLM endpoint with sample prompts
-- [PENDING] Verify LLM traces in OpenLLMetry
+- [COMPLETED] Install `ollama` Python package
+- [COMPLETED] Create `app/llm_service.py` with Ollama client
+- [COMPLETED] Implement connection check function
+- [COMPLETED] Implement completion function with error handling
+- [COMPLETED] Add Traceloop decorators for LLM operations
+- [COMPLETED] Create `/api/llm/complete` endpoint in `app/routes.py`
+- [COMPLETED] Add custom span attributes (model, tokens, prompt length)
+- [COMPLETED] Test LLM endpoint with sample prompts
+- [COMPLETED] Verify LLM traces in OpenLLMetry
 
 **Deliverables:**
 - Working LLM completion endpoint

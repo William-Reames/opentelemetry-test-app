@@ -5,9 +5,10 @@ This module defines all API endpoints for the application.
 """
 
 from datetime import datetime
-from flask import jsonify
+from flask import jsonify, request
 
 from app.telemetry import add_span_attributes
+from app.llm_service import complete_with_ollama
 
 
 def register_routes(app):
@@ -60,19 +61,102 @@ def register_routes(app):
             }
         }), 200
     
-    # Placeholder for LLM endpoint (Phase 3)
     @app.route('/api/llm/complete', methods=['POST'])
     def llm_complete():
         """
-        LLM completion endpoint (to be implemented in Phase 3).
+        LLM completion endpoint.
+        
+        Request body:
+            {
+                "prompt": "Your prompt here",
+                "model": "llama2" (optional),
+                "max_tokens": 100 (optional),
+                "temperature": 0.7 (optional)
+            }
         
         Returns:
-            JSON response indicating endpoint is not yet implemented.
+            JSON response with completion or error.
         """
-        return jsonify({
-            'error': 'Not implemented yet',
-            'message': 'This endpoint will be implemented in Phase 3'
-        }), 501
+        # Validate request
+        if not request.is_json:
+            return jsonify({
+                'error': 'Invalid request',
+                'message': 'Content-Type must be application/json'
+            }), 400
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        if 'prompt' not in data:
+            return jsonify({
+                'error': 'Missing required field',
+                'message': 'Request must include "prompt" field'
+            }), 400
+        
+        prompt = data['prompt']
+        if not prompt or not isinstance(prompt, str):
+            return jsonify({
+                'error': 'Invalid prompt',
+                'message': 'Prompt must be a non-empty string'
+            }), 400
+        
+        # Extract optional parameters
+        model = data.get('model')
+        max_tokens = data.get('max_tokens')
+        temperature = data.get('temperature', 0.7)
+        
+        # Validate temperature
+        if not isinstance(temperature, (int, float)) or temperature < 0 or temperature > 1:
+            return jsonify({
+                'error': 'Invalid temperature',
+                'message': 'Temperature must be a number between 0 and 1'
+            }), 400
+        
+        # Add request attributes to span
+        add_span_attributes(**{
+            'request.type': 'llm_completion',
+            'llm.prompt_length': len(prompt),
+            'llm.model_requested': model or app.config.get('OLLAMA_MODEL', 'llama2'),
+        })
+        
+        # Call LLM service
+        try:
+            result = complete_with_ollama(
+                prompt=prompt,
+                model=model,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+            
+            # Check if there was an error
+            if 'error' in result:
+                add_span_attributes(**{
+                    'error': True,
+                    'error.type': result['error']
+                })
+                
+                status_code = 503 if result['error'] == 'Ollama not available' else 500
+                return jsonify(result), status_code
+            
+            # Add success attributes to span
+            add_span_attributes(**{
+                'llm.completion_length': len(result.get('completion', '')),
+                'llm.total_tokens': result.get('tokens', 0),
+                'llm.latency_ms': result.get('latency_ms', 0),
+            })
+            
+            return jsonify(result), 200
+        
+        except Exception as e:
+            add_span_attributes(**{
+                'error': True,
+                'error.message': str(e)
+            })
+            
+            return jsonify({
+                'error': 'Internal error',
+                'message': str(e)
+            }), 500
     
     # Placeholder for RAG endpoint (Phase 4)
     @app.route('/api/rag/query', methods=['POST'])
