@@ -11,6 +11,9 @@ import time
 from typing import Any, Dict, List, Optional
 
 import chromadb
+from chromadb.api import ClientAPI
+from chromadb.api.models.Collection import Collection
+from chromadb.api.types import Metadata
 from chromadb.config import Settings
 from opentelemetry import trace
 from traceloop.sdk.decorators import task, workflow
@@ -27,11 +30,11 @@ class RAGServiceError(Exception):
 
 
 # Global ChromaDB client (initialized once)
-_chroma_client: Optional[chromadb.Client] = None  # pylint: disable=invalid-name
-_collection: Optional[chromadb.Collection] = None  # pylint: disable=invalid-name
+_chroma_client: Optional[ClientAPI] = None  # pylint: disable=invalid-name
+_collection: Optional[Collection] = None  # pylint: disable=invalid-name
 
 
-def _get_chroma_client() -> chromadb.Client:
+def _get_chroma_client() -> ClientAPI:
     """
     Get or create the ChromaDB client (singleton pattern).
 
@@ -60,7 +63,7 @@ def _get_chroma_client() -> chromadb.Client:
     return _chroma_client
 
 
-def _get_or_create_collection() -> chromadb.Collection:
+def _get_or_create_collection() -> Collection:
     """
     Get or create the ChromaDB collection.
 
@@ -172,7 +175,9 @@ def ingest_documents(file_path: str, chunk_size: int = 500, overlap: int = 50) -
 
         # Prepare documents for ingestion
         ids = [f"doc_{i}" for i in range(len(chunks))]
-        metadatas = [{"source": file_path, "chunk_index": i} for i in range(len(chunks))]
+        metadatas: List[Metadata] = [
+            {"source": file_path, "chunk_index": i} for i in range(len(chunks))
+        ]
 
         # Add to collection (ChromaDB will auto-generate embeddings)
         logger.info("Adding %d chunks to collection: %s", len(chunks), Config.CHROMA_COLLECTION)
