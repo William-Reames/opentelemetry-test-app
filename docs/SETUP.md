@@ -210,23 +210,28 @@ INFO:werkzeug: * Running on http://127.0.0.1:5000
 
 ### Step 3: Ingest Sample Documents (First Time Only)
 
-In a new terminal, run the ingestion script:
+In a new terminal, call the running application's ingestion endpoint:
 
 ```bash
-# Using uv
-uv run python -c "from app.rag_service import ingest_documents; ingest_documents('data/sample_docs.txt')"
-
-# Or with activated venv
-python -c "from app.rag_service import ingest_documents; ingest_documents('data/sample_docs.txt')"
+curl -X POST http://localhost:5000/api/rag/ingest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_path": "data/sample_docs.txt"
+  }'
 ```
 
-Or use the Python REPL:
+Expected response:
 
-```python
-from app.rag_service import ingest_documents
-result = ingest_documents('data/sample_docs.txt')
-print(result)
+```json
+{
+  "success": true,
+  "chunks_count": 10,
+  "collection": "documents",
+  "latency_ms": 123
+}
 ```
+
+Using the HTTP endpoint is recommended because ingestion runs in the same application process that serves `/api/rag/query`.
 
 ## Verification
 

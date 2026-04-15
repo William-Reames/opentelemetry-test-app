@@ -198,7 +198,61 @@ print(result["completion"])
 
 ---
 
-### RAG Query
+### RAG Ingest
++
++Load documents into the RAG collection using the running application process.
++
++#### Request
++
++```http
++POST /api/rag/ingest
++Content-Type: application/json
++```
++
++#### Request Body
++
++```json
++{
++  "file_path": "data/sample_docs.txt",
++  "chunk_size": 500,
++  "overlap": 50
++}
++```
++
++#### Request Parameters
++
++| Parameter | Type | Required | Default | Description |
++|-----------|------|----------|---------|-------------|
++| `file_path` | string | Yes | - | Path to the document file to ingest |
++| `chunk_size` | integer | No | `500` | Maximum chunk size in characters |
++| `overlap` | integer | No | `50` | Character overlap between chunks |
++
++#### Response
++
++**Status Code:** `200 OK`
++
++```json
++{
++  "success": true,
++  "chunks_count": 10,
++  "collection": "documents",
++  "latency_ms": 123
++}
++```
++
++#### Example
++
++```bash
++curl -X POST http://localhost:5000/api/rag/ingest \
++  -H "Content-Type: application/json" \
++  -d '{
++    "file_path": "data/sample_docs.txt"
++  }'
++```
++
++---
++
++### RAG Query
 
 Perform a Retrieval-Augmented Generation query using vector search and LLM.
 

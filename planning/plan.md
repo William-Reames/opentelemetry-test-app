@@ -215,6 +215,7 @@ Add business-specific attributes:
 
 #### Document Ingestion
 - Load sample documents from `data/sample_docs.txt`
+- Use the running application's `POST /api/rag/ingest` endpoint for ingestion so writes happen in the same app process used for queries
 - Split into chunks (500 characters, 50 overlap)
 - Generate embeddings
 - Store in ChromaDB with metadata

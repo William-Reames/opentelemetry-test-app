@@ -67,7 +67,9 @@ curl -X POST http://localhost:5000/api/llm/complete \
   -d '{"prompt": "What is OpenTelemetry?"}'
 
 # Ingest sample documents (first time only)
-uv run python -c "from app.rag_service import ingest_documents; ingest_documents('data/sample_docs.txt')"
+curl -X POST http://localhost:5000/api/rag/ingest \
+  -H "Content-Type: application/json" \
+  -d '{"file_path": "data/sample_docs.txt"}'
 
 # Try a RAG query
 curl -X POST http://localhost:5000/api/rag/query \
