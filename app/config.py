@@ -1,0 +1,67 @@
+"""
+Configuration management for the AI Tracing Prototype.
+
+Loads configuration from environment variables with sensible defaults.
+"""
+
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if it exists
+load_dotenv()
+
+
+class Config:
+    """Application configuration class."""
+    
+    # Flask Configuration
+    FLASK_ENV = os.getenv("FLASK_ENV", "development")
+    FLASK_DEBUG = os.getenv("FLASK_DEBUG", "true").lower() == "true"
+    PORT = int(os.getenv("PORT", "5000"))
+    
+    # Ollama Configuration
+    OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama2")
+    OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "30"))
+    
+    # ChromaDB Configuration
+    CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
+    CHROMA_COLLECTION = os.getenv("CHROMA_COLLECTION", "documents")
+    
+    # OpenLLMetry / Traceloop Configuration
+    TRACELOOP_API_KEY = os.getenv("TRACELOOP_API_KEY")
+    TRACELOOP_DISABLE_BATCH = os.getenv("TRACELOOP_DISABLE_BATCH", "false").lower() == "true"
+    
+    # OpenTelemetry Configuration
+    OTEL_SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "ai-tracing-prototype")
+    OTEL_LOG_LEVEL = os.getenv("OTEL_LOG_LEVEL", "info")
+    
+    @classmethod
+    def validate(cls):
+        """
+        Validate required configuration values.
+        
+        Raises:
+            ValueError: If required configuration is missing.
+        """
+        if not cls.TRACELOOP_API_KEY:
+            print("WARNING: TRACELOOP_API_KEY not set. Tracing will not work properly.")
+            print("Get your API key from https://app.traceloop.com")
+    
+    @classmethod
+    def display(cls):
+        """Display current configuration (excluding sensitive values)."""
+        print("\n=== Application Configuration ===")
+        print(f"Flask Environment: {cls.FLASK_ENV}")
+        print(f"Flask Debug: {cls.FLASK_DEBUG}")
+        print(f"Port: {cls.PORT}")
+        print(f"Ollama Host: {cls.OLLAMA_HOST}")
+        print(f"Ollama Model: {cls.OLLAMA_MODEL}")
+        print(f"Ollama Timeout: {cls.OLLAMA_TIMEOUT}s")
+        print(f"ChromaDB Persist Dir: {cls.CHROMA_PERSIST_DIR}")
+        print(f"ChromaDB Collection: {cls.CHROMA_COLLECTION}")
+        print(f"Traceloop API Key: {'Set' if cls.TRACELOOP_API_KEY else 'Not Set'}")
+        print(f"OpenTelemetry Service Name: {cls.OTEL_SERVICE_NAME}")
+        print("================================\n")
+
+# Made with Bob
