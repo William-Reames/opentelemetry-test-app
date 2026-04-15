@@ -607,7 +607,7 @@ curl -X POST http://localhost:5000/api/rag/query \
 Add tests and comprehensive documentation.
 
 **Tasks:**
-- [PENDING] Write unit tests in `tests/test_llm.py`
+- [COMPLETED] Write unit tests in `tests/test_llm.py`
 - [PENDING] Write unit tests in `tests/test_rag.py`
 - [PENDING] Create `docs/SETUP.md` with step-by-step setup instructions
 - [PENDING] Create `docs/API.md` with endpoint documentation and examples
