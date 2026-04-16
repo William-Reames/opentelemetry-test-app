@@ -28,9 +28,17 @@ class Config:
     CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
     CHROMA_COLLECTION = os.getenv("CHROMA_COLLECTION", "documents")
     
+    # Tracing Backend Configuration
+    TRACING_BACKEND = os.getenv("TRACING_BACKEND", "traceloop")  # Options: traceloop, langfuse, traceloop,langfuse, none
+    
     # OpenLLMetry / Traceloop Configuration
     TRACELOOP_API_KEY = os.getenv("TRACELOOP_API_KEY")
     TRACELOOP_DISABLE_BATCH = os.getenv("TRACELOOP_DISABLE_BATCH", "false").lower() == "true"
+    
+    # LangFuse Configuration
+    LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
+    LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
+    LANGFUSE_HOST = os.getenv("LANGFUSE_HOST", "http://localhost:3000")
     
     # OpenTelemetry Configuration
     OTEL_SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "ai-tracing-prototype")
@@ -44,9 +52,19 @@ class Config:
         Raises:
             ValueError: If required configuration is missing.
         """
-        if not cls.TRACELOOP_API_KEY:
-            print("WARNING: TRACELOOP_API_KEY not set. Tracing will not work properly.")
-            print("Get your API key from https://app.traceloop.com")
+        backends = [b.strip() for b in cls.TRACING_BACKEND.split(',')]
+        
+        # Validate TraceLoop configuration if enabled
+        if 'traceloop' in backends:
+            if not cls.TRACELOOP_API_KEY:
+                print("WARNING: TRACELOOP_API_KEY not set but traceloop backend is enabled.")
+                print("Get your API key from https://app.traceloop.com")
+        
+        # Validate LangFuse configuration if enabled
+        if 'langfuse' in backends:
+            if not cls.LANGFUSE_PUBLIC_KEY or not cls.LANGFUSE_SECRET_KEY:
+                print("WARNING: LANGFUSE_PUBLIC_KEY or LANGFUSE_SECRET_KEY not set but langfuse backend is enabled.")
+                print("Configure LangFuse keys from your LangFuse instance.")
     
     @classmethod
     def display(cls):
@@ -60,7 +78,10 @@ class Config:
         print(f"Ollama Timeout: {cls.OLLAMA_TIMEOUT}s")
         print(f"ChromaDB Persist Dir: {cls.CHROMA_PERSIST_DIR}")
         print(f"ChromaDB Collection: {cls.CHROMA_COLLECTION}")
+        print(f"Tracing Backend: {cls.TRACING_BACKEND}")
         print(f"Traceloop API Key: {'Set' if cls.TRACELOOP_API_KEY else 'Not Set'}")
+        print(f"LangFuse Public Key: {'Set' if cls.LANGFUSE_PUBLIC_KEY else 'Not Set'}")
+        print(f"LangFuse Host: {cls.LANGFUSE_HOST}")
         print(f"OpenTelemetry Service Name: {cls.OTEL_SERVICE_NAME}")
         print("================================\n")
 
