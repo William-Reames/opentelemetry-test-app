@@ -480,5 +480,3 @@ If implementation fails:
 - [OpenTelemetry Semantic Conventions for GenAI](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
 
 ---
-
-**XXX** Please review this updated plan. The key change is that we're **adding** LangFuse as an option rather than **replacing** TraceLoop, giving users the flexibility to choose or use both!
