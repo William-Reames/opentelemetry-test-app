@@ -1,9 +1,9 @@
-# LangFuse Self-Hosted Stack
-# This compose file sets up a complete LangFuse instance with PostgreSQL
+# LangFuse Self-Hosted Stack (v3)
+# This compose file sets up a complete LangFuse instance with PostgreSQL and ClickHouse
 # Use with Podman Compose: podman-compose up -d
 
 services:
-  # PostgreSQL Database for LangFuse
+  # PostgreSQL Database for LangFuse (metadata and auth)
   postgres:
     image: postgres:15-alpine
     container_name: langfuse-postgres
@@ -22,19 +22,46 @@ services:
     networks:
       - langfuse-network
 
+  # ClickHouse Database for LangFuse (traces and analytics)
+  clickhouse:
+    image: clickhouse/clickhouse-server:24-alpine
+    container_name: langfuse-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: langfuse
+      CLICKHOUSE_USER: langfuse
+      CLICKHOUSE_PASSWORD: langfuse_clickhouse_password_change_me
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - langfuse_clickhouse:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - langfuse-network
+
   # LangFuse Application
   langfuse:
-    image: langfuse/langfuse:latest
+    image: ghcr.io/langfuse/langfuse:latest
     container_name: langfuse-app
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
+      clickhouse:
+        condition: service_healthy
     ports:
       - "3000:3000"
     environment:
-      # Database Connection
+      # PostgreSQL Connection (metadata and auth)
       DATABASE_URL: postgresql://langfuse:langfuse_password_change_me@postgres:5432/langfuse
+      
+      # ClickHouse Connection (traces and analytics)
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: langfuse
+      CLICKHOUSE_PASSWORD: langfuse_clickhouse_password_change_me
       
       # NextAuth Configuration (required for authentication)
       NEXTAUTH_SECRET: change_me_to_random_string_min_32_chars
@@ -43,8 +70,8 @@ services:
       # Salt for encryption (required)
       SALT: change_me_to_random_string
       
-      # Telemetry (optional - set to 1 to enable)
-      TELEMETRY_ENABLED: "0"
+      # Telemetry (optional - set to true to enable)
+      TELEMETRY_ENABLED: "false"
       
       # Optional: Configure SMTP for email notifications
       # EMAIL_FROM_ADDRESS: noreply@example.com
@@ -57,12 +84,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
     networks:
       - langfuse-network
 
 volumes:
   langfuse_db:
+    driver: local
+  langfuse_clickhouse:
     driver: local
 
 networks:

@@ -2,6 +2,8 @@
 
 This guide explains how to set up a self-hosted LangFuse instance for tracing your LLM applications.
 
+> **Note**: The provided `compose.yml` uses LangFuse v3, which requires both PostgreSQL and ClickHouse. If you encounter issues with ClickHouse, see the [Alternative: LangFuse v2](#alternative-langfuse-v2-postgresql-only) section below for a simpler PostgreSQL-only setup.
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -448,3 +450,102 @@ podman-compose up -d
 ---
 
 **Ready to start tracing?** Follow the [Quick Start](#quick-start-with-podman-compose) guide above!
+
+## Alternative: LangFuse v2 (PostgreSQL Only)
+
+If you encounter issues with ClickHouse or prefer a simpler setup, you can use LangFuse v2 which only requires PostgreSQL.
+
+### Create compose-v2.yml
+
+Create a file named `compose-v2.yml` with this content:
+
+```yaml
+# LangFuse Self-Hosted Stack (v2 - PostgreSQL only)
+# Simpler alternative that doesn't require ClickHouse
+# Use with: podman-compose -f compose-v2.yml up -d
+
+services:
+  # PostgreSQL Database for LangFuse
+  postgres:
+    image: postgres:15-alpine
+    container_name: langfuse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: langfuse
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse_password_change_me
+    volumes:
+      - langfuse_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - langfuse-network
+
+  # LangFuse Application (v2)
+  langfuse:
+    image: ghcr.io/langfuse/langfuse:2
+    container_name: langfuse-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      # Database Connection
+      DATABASE_URL: postgresql://langfuse:langfuse_password_change_me@postgres:5432/langfuse
+      
+      # NextAuth Configuration
+      NEXTAUTH_SECRET: change_me_to_random_string_min_32_chars
+      NEXTAUTH_URL: http://localhost:3000
+      
+      # Salt for encryption
+      SALT: change_me_to_random_string
+      
+      # Telemetry
+      TELEMETRY_ENABLED: "0"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/public/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - langfuse-network
+
+volumes:
+  langfuse_db:
+    driver: local
+
+networks:
+  langfuse-network:
+    driver: bridge
+```
+
+### Start LangFuse v2
+
+```bash
+# Start with v2 compose file
+podman-compose -f compose-v2.yml up -d
+
+# Check status
+podman-compose -f compose-v2.yml ps
+
+# View logs
+podman-compose -f compose-v2.yml logs -f langfuse
+```
+
+### Differences Between v2 and v3
+
+| Feature | v2 (PostgreSQL only) | v3 (PostgreSQL + ClickHouse) |
+|---------|---------------------|------------------------------|
+| **Setup Complexity** | Simple | More complex |
+| **Resource Usage** | Lower | Higher |
+| **Performance** | Good for small-medium scale | Better for large scale |
+| **Analytics** | Basic | Advanced |
+| **Maintenance** | Easier | More components to manage |
+
+**Recommendation**: Start with v2 for development and testing. Upgrade to v3 if you need better performance at scale.

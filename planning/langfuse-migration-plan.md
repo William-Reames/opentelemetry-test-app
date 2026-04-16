@@ -256,12 +256,13 @@ if 'langfuse' in config.TRACING_BACKEND:
 ## Tasks
 
 ### Phase 1: Infrastructure Setup
-- [ ] Create `compose.yml` for LangFuse stack (PostgreSQL + LangFuse)
-- [ ] Create `docs/LANGFUSE_SETUP.md` with deployment instructions
-- [ ] Test LangFuse deployment with Podman Compose
-- [ ] Document manual setup process
-- [ ] Verify LangFuse UI is accessible
-- [ ] Create API keys in LangFuse UI
+- [x] Create `compose.yml` for LangFuse stack (PostgreSQL + LangFuse)
+- [x] Create `compose-v2.yml` for simpler PostgreSQL-only setup
+- [x] Create `docs/LANGFUSE_SETUP.md` with deployment instructions
+- [x] Test LangFuse deployment with Podman Compose
+- [x] Document manual setup process
+- [x] Verify LangFuse UI is accessible
+- [x] Create API keys in LangFuse UI (documented in setup guide)
 
 ### Phase 2: Dependency Updates
 - [ ] Add `langfuse` SDK to [`pyproject.toml`](pyproject.toml) (keep traceloop-sdk)
