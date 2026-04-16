@@ -23,7 +23,7 @@ except ImportError:
 _TRACING_INITIALIZED = False
 
 
-def initialize_telemetry(app, config):
+def initialize_telemetry(app, config):  # pylint: disable=too-many-branches
     """
     Initialize tracing for the Flask application with multi-backend support.
 
@@ -37,23 +37,23 @@ def initialize_telemetry(app, config):
         app: Flask application instance.
         config: Application configuration object.
     """
-    global _TRACING_INITIALIZED
+    global _TRACING_INITIALIZED  # pylint: disable=global-statement
 
     if _TRACING_INITIALIZED:
         return
 
     logger = app.logger or logging.getLogger(__name__)
-    
+
     # Parse backend configuration
     backends = [b.strip().lower() for b in config.TRACING_BACKEND.split(',')]
-    
+
     if 'none' in backends:
         logger.info("Tracing disabled (TRACING_BACKEND=none)")
         _TRACING_INITIALIZED = True
         return
-    
+
     logger.info("Initializing tracing with backends: %s", ', '.join(backends))
-    
+
     # Initialize TraceLoop if enabled
     if 'traceloop' in backends:
         if Traceloop is None:
@@ -67,17 +67,24 @@ def initialize_telemetry(app, config):
                     api_key=config.TRACELOOP_API_KEY,
                     disable_batch=config.TRACELOOP_DISABLE_BATCH,
                 )
-                logger.info("✓ Traceloop backend initialized for service '%s'", config.OTEL_SERVICE_NAME)
-            except Exception as exc:  # pragma: no cover - defensive path
+                logger.info(
+                    "✓ Traceloop backend initialized for service '%s'",
+                    config.OTEL_SERVICE_NAME
+                )
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                # pragma: no cover - defensive path
                 logger.warning("Traceloop initialization failed: %s", exc)
-    
+
     # Initialize LangFuse if enabled
     if 'langfuse' in backends:
         if not LANGFUSE_AVAILABLE:
             logger.warning("LangFuse SDK is not installed; skipping LangFuse backend.")
             logger.warning("Install with: uv add langfuse")
         elif not config.LANGFUSE_PUBLIC_KEY or not config.LANGFUSE_SECRET_KEY:
-            logger.warning("LANGFUSE_PUBLIC_KEY or LANGFUSE_SECRET_KEY not set; skipping LangFuse backend.")
+            logger.warning(
+                "LANGFUSE_PUBLIC_KEY or LANGFUSE_SECRET_KEY not set; "
+                "skipping LangFuse backend."
+            )
         else:
             try:
                 tracer_provider = trace.get_tracer_provider()
@@ -88,7 +95,8 @@ def initialize_telemetry(app, config):
                 )
                 tracer_provider.add_span_processor(langfuse_processor)
                 logger.info("✓ LangFuse backend initialized (host: %s)", config.LANGFUSE_HOST)
-            except Exception as exc:  # pragma: no cover - defensive path
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                # pragma: no cover - defensive path
                 logger.warning("LangFuse initialization failed: %s", exc)
 
     # Instrument Flask (works with all backends)
@@ -96,7 +104,8 @@ def initialize_telemetry(app, config):
         FlaskInstrumentor().instrument_app(app)
         _TRACING_INITIALIZED = True
         logger.info("✓ Flask OpenTelemetry instrumentation enabled")
-    except Exception as exc:  # pragma: no cover - defensive path
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        # pragma: no cover - defensive path
         logger.warning("Flask instrumentation failed: %s", exc)
 
 
