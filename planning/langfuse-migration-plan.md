@@ -273,39 +273,39 @@ if 'langfuse' in config.TRACING_BACKEND:
 ### Phase 3: Code Updates
 
 #### 3.1 Update [`app/config.py`](app/config.py)
-- [ ] Add `TRACING_BACKEND` configuration (default: "traceloop")
-- [ ] Add `LANGFUSE_PUBLIC_KEY` (optional)
-- [ ] Add `LANGFUSE_SECRET_KEY` (optional)
-- [ ] Add `LANGFUSE_HOST` (default: "http://localhost:3000")
-- [ ] Keep existing TraceLoop configuration
-- [ ] Update `validate()` method to check backend-specific requirements
-- [ ] Update `display()` method to show backend selection
+- [x] Add `TRACING_BACKEND` configuration (default: "traceloop")
+- [x] Add `LANGFUSE_PUBLIC_KEY` (optional)
+- [x] Add `LANGFUSE_SECRET_KEY` (optional)
+- [x] Add `LANGFUSE_HOST` (default: "http://localhost:3000")
+- [x] Keep existing TraceLoop configuration
+- [x] Update `validate()` method to check backend-specific requirements
+- [x] Update `display()` method to show backend selection
 
 #### 3.2 Update [`app/telemetry.py`](app/telemetry.py)
-- [ ] Add LangFuse imports (conditional)
-- [ ] Add backend selection logic
-- [ ] Initialize TraceLoop if `'traceloop'` in backends
-- [ ] Add LangFuse span processor if `'langfuse'` in backends
-- [ ] Support both backends simultaneously
-- [ ] Add error handling for each backend
-- [ ] Keep existing `add_span_attributes()` helper
-- [ ] Add logging for which backends are active
+- [x] Add LangFuse imports (conditional)
+- [x] Add backend selection logic
+- [x] Initialize TraceLoop if `'traceloop'` in backends
+- [x] Add LangFuse span processor if `'langfuse'` in backends
+- [x] Support both backends simultaneously
+- [x] Add error handling for each backend
+- [x] Keep existing `add_span_attributes()` helper
+- [x] Add logging for which backends are active
 
 #### 3.3 Update [`app/llm_service.py`](app/llm_service.py)
-- [ ] **No changes required** - decorators work with both backends
-- [ ] Optional: Add LangFuse-specific attributes when enabled
-- [ ] Verify existing span attributes work with both
+- [x] **No changes required** - decorators work with both backends
+- [x] Optional: Add LangFuse-specific attributes when enabled
+- [x] Verify existing span attributes work with both
 
 #### 3.4 Update [`app/rag_service.py`](app/rag_service.py)
-- [ ] **No changes required** - decorators work with both backends
-- [ ] Optional: Add LangFuse-specific attributes when enabled
+- [x] **No changes required** - decorators work with both backends
+- [x] Optional: Add LangFuse-specific attributes when enabled
 
 #### 3.5 Update [`.env.example`](.env.example)
-- [ ] Add `TRACING_BACKEND` with examples
-- [ ] Add LangFuse configuration section
-- [ ] Keep existing TraceLoop configuration
-- [ ] Add comments explaining backend options
-- [ ] Include example keys format
+- [x] Add `TRACING_BACKEND` with examples
+- [x] Add LangFuse configuration section
+- [x] Keep existing TraceLoop configuration
+- [x] Add comments explaining backend options
+- [x] Include example keys format
 
 ### Phase 4: Testing Updates
 
