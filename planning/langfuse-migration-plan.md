@@ -265,10 +265,10 @@ if 'langfuse' in config.TRACING_BACKEND:
 - [x] Create API keys in LangFuse UI (documented in setup guide)
 
 ### Phase 2: Dependency Updates
-- [ ] Add `langfuse` SDK to [`pyproject.toml`](pyproject.toml) (keep traceloop-sdk)
-- [ ] Run `uv sync` to update dependencies
-- [ ] Verify no dependency conflicts
-- [ ] Run `uv run pylint app/` to check for issues
+- [x] Add `langfuse` SDK to [`pyproject.toml`](pyproject.toml) (keep traceloop-sdk)
+- [x] Run `uv sync` to update dependencies
+- [x] Verify no dependency conflicts
+- [x] Run `uv run pylint app/` to check for issues
 
 ### Phase 3: Code Updates
 
