@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from flask import jsonify, request
 
-from app.llm_service import complete_with_ollama
+from app.llm_service import OllamaServiceError, generate_completion
 from app.rag_service import get_collection_stats, ingest_documents, query_with_rag
 from app.telemetry import add_span_attributes
 
@@ -150,17 +150,12 @@ def register_routes(app):  # pylint: disable=too-many-statements
         )
 
         try:
-            result = complete_with_ollama(
+            result = generate_completion(
                 prompt=prompt,
                 model=model,
                 max_tokens=max_tokens,
                 temperature=temperature,
             )
-
-            if "error" in result:
-                _record_error_attributes(result["error"])
-                status_code = 503 if result["error"] == "Ollama not available" else 500
-                return jsonify(result), status_code
 
             add_span_attributes(
                 **{
@@ -171,6 +166,9 @@ def register_routes(app):  # pylint: disable=too-many-statements
             )
             return jsonify(result), 200
 
+        except OllamaServiceError as exc:
+            _record_error_attributes("llm_error", str(exc))
+            return _json_error("LLM service error", str(exc), 503)
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _record_error_attributes("internal_error", str(exc))
             return _json_error("Internal error", str(exc), 500)
