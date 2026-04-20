@@ -12,7 +12,19 @@ This project showcases how to implement comprehensive observability for AI appli
 - **LLM Integration**: Direct integration with Ollama for local LLM inference
 - **RAG Pipeline**: Complete retrieval-augmented generation with vector search
 - **OpenTelemetry Tracing**: Full distributed tracing with span hierarchy
-- **OpenLLMetry Integration**: Enhanced AI-specific observability
+- **Multi-Platform Observability**: Support for Traceloop, Langfuse, and Grafana
+
+### Observability Platforms
+
+This application integrates with multiple observability platforms:
+
+| Platform | Purpose | Status |
+|----------|---------|--------|
+| **[Traceloop](https://www.traceloop.com/)** | AI-specific tracing and monitoring | ✅ Integrated |
+| **[Langfuse](https://langfuse.com/)** | LLM analytics and cost tracking | 🔧 Configuration available |
+| **[Grafana](https://grafana.com/)** | Metrics visualization and dashboards | 🔧 Configuration available |
+
+See the **[Observability Integration Guide](docs/OBSERVABILITY_INTEGRATION.md)** for detailed setup instructions for each platform.
 
 ### Key Features
 
@@ -87,6 +99,8 @@ curl -X POST http://localhost:5000/api/rag/query \
 
 - **[Setup Guide](docs/SETUP.md)** - Detailed installation and configuration instructions
 - **[API Documentation](docs/API.md)** - Complete API reference with examples
+- **[Observability Integration](docs/OBSERVABILITY_INTEGRATION.md)** - Traceloop, Langfuse, and Grafana integration guide
+- **[Deployment Scenarios](docs/DEPLOYMENT_SCENARIOS.md)** - Local and cloud deployment options with cost analysis
 - **[Language Guide](docs/LANGUAGES.md)** - Notes for implementing in other languages
 
 ## 🏗️ Architecture

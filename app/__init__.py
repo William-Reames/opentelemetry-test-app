@@ -29,8 +29,17 @@ def create_app():
     if Config.FLASK_DEBUG:
         Config.display()
     
-    # Initialize telemetry
+    # Initialize telemetry (Traceloop)
     initialize_telemetry(app, Config)
+    
+    # Initialize Grafana integration if enabled
+    if Config.ENABLE_GRAFANA:
+        from app.grafana_integration import initialize_grafana_telemetry
+        initialize_grafana_telemetry(app)
+    
+    # Initialize Langfuse OTLP integration
+    from app.langfuse_integration import configure_langfuse_otlp
+    configure_langfuse_otlp()
 
     # Register routes
     from app.routes import register_routes
