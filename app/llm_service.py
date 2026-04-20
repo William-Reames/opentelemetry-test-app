@@ -15,6 +15,7 @@ from opentelemetry import trace
 from traceloop.sdk.decorators import task
 
 from app.config import Config
+from app.langfuse_integration import trace_llm_call
 
 logger = logging.getLogger(__name__)
 tracer = trace.get_tracer(__name__)
@@ -117,6 +118,16 @@ def generate_completion(
             total_tokens,
             latency_ms,
         )
+        
+        # Trace to Langfuse
+        trace_llm_call(
+            prompt=prompt,
+            completion=completion,
+            model=selected_model,
+            tokens=total_tokens,
+            latency_ms=latency_ms
+        )
+        
         return {
             "completion": completion,
             "model": selected_model,

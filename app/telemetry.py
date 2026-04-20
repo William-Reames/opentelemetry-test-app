@@ -9,7 +9,11 @@ from __future__ import annotations
 import logging
 
 from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from traceloop.sdk import Traceloop
 
 _TRACING_INITIALIZED = False
@@ -33,6 +37,25 @@ def initialize_telemetry(app, config):
 
     logger = app.logger or logging.getLogger(__name__)
 
+    # Configure OpenTelemetry to export to Tempo
+    try:
+        resource = Resource.create({"service.name": config.OTEL_SERVICE_NAME})
+        tracer_provider = TracerProvider(resource=resource)
+        
+        # Add OTLP exporter for Tempo
+        otlp_exporter = OTLPSpanExporter(
+            endpoint=config.TEMPO_ENDPOINT,
+            insecure=True  # Use insecure for local development
+        )
+        tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+        
+        # Set the global tracer provider
+        trace.set_tracer_provider(tracer_provider)
+        logger.info("OpenTelemetry configured to export to Tempo at %s", config.TEMPO_ENDPOINT)
+    except Exception as exc:
+        logger.warning("Failed to configure Tempo exporter: %s", exc)
+
+    # Initialize Traceloop if configured
     if Traceloop is None:
         logger.warning("Traceloop SDK is not installed; continuing without Traceloop.")
     elif not config.TRACELOOP_API_KEY:

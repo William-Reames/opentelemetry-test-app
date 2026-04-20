@@ -32,6 +32,15 @@ class Config:
     TRACELOOP_API_KEY = os.getenv("TRACELOOP_API_KEY")
     TRACELOOP_DISABLE_BATCH = os.getenv("TRACELOOP_DISABLE_BATCH", "false").lower() == "true"
     
+    # Langfuse Configuration
+    LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
+    LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
+    LANGFUSE_HOST = os.getenv("LANGFUSE_HOST", "http://localhost:3002")
+    
+    # Grafana/Tempo Configuration
+    TEMPO_ENDPOINT = os.getenv("TEMPO_ENDPOINT", "http://localhost:4317")
+    ENABLE_GRAFANA = os.getenv("ENABLE_GRAFANA", "false").lower() == "true"
+    
     # OpenTelemetry Configuration
     OTEL_SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "ai-tracing-prototype")
     OTEL_LOG_LEVEL = os.getenv("OTEL_LOG_LEVEL", "info")
