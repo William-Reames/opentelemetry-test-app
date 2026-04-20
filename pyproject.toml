@@ -19,8 +19,9 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "requests>=2.31.0",
     "sentence-transformers>=2.3.1",
-    "traceloop-sdk>=0.20.0",
+    "traceloop-sdk>=0.30.0",
     "werkzeug>=3.0.1",
+    "wrapt<2.0.0",
 ]
 
 [dependency-groups]
